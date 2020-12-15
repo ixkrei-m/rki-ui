@@ -1,25 +1,31 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Container, Grid, Header } from "semantic-ui-react";
+import moment from "moment";
+import "moment/locale/de";
+
+import Chart from "Chart";
+
+moment.locale("de");
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container as='main' style={{ padding: "100px 0" }}>
+      <Grid>
+        <Grid.Row>
+          <Grid.Column>
+            <Header inverted as='h1'>
+              Corona Statistiken direkt vom Robert-Koch-Institut
+              <Header.Subheader>Daten werden jeden Tag um 10:00 Uhr aktualisiert</Header.Subheader>
+            </Header>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Chart />
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+    </Container>
   );
 }
 
