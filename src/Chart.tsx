@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import moment, { Moment } from "moment";
-import { Header, Label, Loader } from "semantic-ui-react";
+import { Visibility, VisibilityEventData, Header, Loader } from "semantic-ui-react";
 import {
   LineChart,
   Line,
@@ -36,16 +36,16 @@ function Chart() {
   const [data, setData] = useState<IGeneral[]>(undefined!);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<IFetchError>(undefined!);
+  const [width, setWidth] = useState(0);
 
   useEffect(() => {
     setLoading(true);
 
-    fetch("https://corona.maximilianhaindl.de/api/general")
+    fetch("/api/general")
       .then((res) => {
         if (res.ok)
           res.json().then((rawData) => {
             setLoading(false);
-            rawData.rep.generals.shift();
             const data = rawData.rep.generals.map((item: IGeneral) => ({
               ...item,
               date: moment(item.date).format("dd L"),
@@ -64,15 +64,18 @@ function Chart() {
   }, []);
 
   return (
-    <React.Fragment>
+    <Visibility
+      updateOn='repaint'
+      onUpdate={(nothing: null, data: VisibilityEventData) => setWidth(data.calculations.width)}
+    >
       {!loading && error && (
         <div>
-          <Header inverted as='h3' content='Error' />
+          <Header inverted as='h3' content='Fehler beim Laden der Daten' />
           <pre>{JSON.stringify(error, null, 2)}</pre>
         </div>
       )}
       {!loading && data && (
-        <LineChart data={data} width={1028} height={500}>
+        <LineChart data={data} width={width} height={500}>
           <XAxis type='category' dataKey='date' height={60} />
           <YAxis type='number' width={80} />
           <Tooltip
@@ -89,6 +92,7 @@ function Chart() {
           </Brush>
           <Line
             key='dailyCases'
+            name='Neuinfektionen'
             type='monotone'
             dataKey='dailyCases'
             stroke='#ff7300'
@@ -96,6 +100,7 @@ function Chart() {
           />
           <Line
             key='dailyRecovered'
+            name='Genesen'
             type='monotone'
             dataKey='dailyRecovered'
             stroke='#076fc4'
@@ -103,17 +108,16 @@ function Chart() {
           />
           <Line
             key='dailyDeaths'
+            name='Todesfälle'
             type='monotone'
             dataKey='dailyDeaths'
-            stroke='#5910ce'
+            stroke='#8a34da'
             strokeWidth={2}
           />
         </LineChart>
       )}
-      <Loader active={loading}>
-        <Label circular basic size='large' content='hole Daten...' color='orange' />
-      </Loader>
-    </React.Fragment>
+      <Loader active={loading} inverted />
+    </Visibility>
   );
 }
 

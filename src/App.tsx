@@ -14,8 +14,8 @@ function App() {
         <Grid.Row>
           <Grid.Column>
             <Header inverted as='h1'>
-              Corona Statistiken direkt vom Robert-Koch-Institut
-              <Header.Subheader>Daten werden jeden Tag um 10:00 Uhr aktualisiert</Header.Subheader>
+              Corona Statistik für Deutschland
+              <Header.Subheader>Daten werden täglich um 10:00 Uhr aktualisiert</Header.Subheader>
             </Header>
           </Grid.Column>
         </Grid.Row>

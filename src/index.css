@@ -1,18 +1,13 @@
 body {
   margin: 0;
-  background: #1b1b1b;
+  background: #131e29;
   color: #fff;
+
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
 }
 
-pre {
-  white-space: pre-wrap;
-  font-size: 14px;
-  line-height: 22px;
-  border-left: 4px solid darksalmon;
-  background: #291d18;
-  color: white;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+html {
+  -webkit-font-smoothing: antialiased;
 }
