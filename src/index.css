@@ -4,12 +4,8 @@ body {
   color: #fff;
 }
 
-html {
-  -webkit-font-smoothing: antialiased;
-}
-
 .pre-main-content {
-  padding: 100px 0;
+  padding: 100px 0 250px 0;
 }
 
 .main-content {
@@ -111,4 +107,24 @@ html {
 .ui.slider.checkbox.white-label .box:hover,
 .ui.slider.checkbox label:hover {
   color: #666 !important;
+}
+
+.ui.attached.segment.footer-segment-main {
+  padding: 5rem;
+
+  background: #2d414f;
+  border: 1px solid transparent;
+}
+
+.ui.segment.footer-segment-brand-buttons {
+  background: #0f1720;
+  border-top: 4px solid white;
+  margin-top: 0 !important;
+  margin-left: -1px;
+  margin-right: -1px;
+}
+
+.ui.fluid.container.no-margin {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }

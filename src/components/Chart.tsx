@@ -120,8 +120,8 @@ function Chart() {
           </Grid.Column>
         </Grid.Row>
 
-        {data && !error && !loading && (
-          <Grid.Row>
+        <Grid.Row>
+          {data && !error && !loading && (
             <div className='chart-container'>
               {transitions.map(({ item, props, key }) => {
                 return (
@@ -131,9 +131,9 @@ function Chart() {
                 );
               })}
             </div>
-          </Grid.Row>
-        )}
-        <Loader active={loading} inverted />
+          )}
+          <Loader active={loading} inverted />
+        </Grid.Row>
       </Grid>
     </React.Fragment>
   );

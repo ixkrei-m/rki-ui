@@ -25,17 +25,8 @@ export function useChartDataProvider() {
   return context;
 }
 
-function useChartState() {
-  const [cases, setCases] = useState(true);
-  const [recovered, setRecovered] = useState(true);
-  const [deaths, setDeaths] = useState(true);
-
-  return [cases, setCases, recovered, setRecovered, deaths, setDeaths];
-}
-
 export default function ChartDataProvider(ownProps: OwnProps) {
   const { data } = ownProps;
-  // const [cases, setCases, recovered, setRecovered, deaths, setDeaths] = useChartState();
 
   const [cases, setCases] = useState(true);
   const [recovered, setRecovered] = useState(true);
