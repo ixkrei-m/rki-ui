@@ -9,7 +9,7 @@ html {
 }
 
 .pre-main-content {
-  padding: 100px 0;
+  padding: 100px 0 250px 0;
 }
 
 .main-content {
@@ -111,4 +111,11 @@ html {
 .ui.slider.checkbox.white-label .box:hover,
 .ui.slider.checkbox label:hover {
   color: #666 !important;
+}
+
+.ui.attached.segment.custom-segment {
+  padding: 30px 0 30px 0;
+
+  background: #2d414f;
+  border: 1px solid transparent;
 }
