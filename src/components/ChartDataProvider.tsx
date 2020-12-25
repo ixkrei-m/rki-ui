@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Checkbox, CheckboxProps, Grid } from "semantic-ui-react";
+import { Checkbox, CheckboxProps, Grid, Visibility, VisibilityEventData } from "semantic-ui-react";
 import { IGeneral } from "./Chart";
 
 interface OwnProps {
@@ -9,6 +9,7 @@ interface OwnProps {
 
 interface ChartState {
   data: IGeneral[];
+  width: number;
   cases: boolean;
   recovered: boolean;
   deaths: boolean;
@@ -31,12 +32,20 @@ export default function ChartDataProvider(ownProps: OwnProps) {
   const [cases, setCases] = useState(true);
   const [recovered, setRecovered] = useState(true);
   const [deaths, setDeaths] = useState(true);
+  const [width, setWidth] = useState(0);
 
   return (
     <React.Fragment>
       <Grid.Column>
-        <ChartDataProviderContext.Provider value={{ data, cases, recovered, deaths }}>
-          {ownProps.children}
+        <ChartDataProviderContext.Provider value={{ data, width, cases, recovered, deaths }}>
+          <Visibility
+            updateOn='repaint'
+            onUpdate={(nothing: null, data: VisibilityEventData) =>
+              setWidth(data.calculations.width)
+            }
+          >
+            {ownProps.children}
+          </Visibility>
         </ChartDataProviderContext.Provider>
       </Grid.Column>
 

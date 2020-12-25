@@ -45,6 +45,7 @@ function Chart() {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState("");
 
+  const headers = ["Fallzahlen pro Tag", "Fallzahlen Total"];
   const chartComponents = [<LineChart />, <BarChart />];
 
   useEffect(() => {
@@ -72,7 +73,20 @@ function Chart() {
       });
   }, []);
 
-  const transitions = useTransition(chartComponents[index], index, {
+  const transitionsHeader = useTransition(headers[index], index, {
+    config: { mass: 2, tension: 30, friction: 16 },
+    from: {
+      opacity: 0,
+      transform: direction === "left" ? "translateX(-100%)" : "translateX(100%)",
+    },
+    enter: { opacity: 1, transform: "translateX(0)" },
+    leave: {
+      opacity: 0,
+      transform: direction === "left" ? "translateX(80%)" : "translateX(-50%)",
+    },
+  });
+
+  const transitionsBody = useTransition(chartComponents[index], index, {
     from: {
       opacity: 0,
       transform: direction === "left" ? "translateX(-100%)" : "translateX(100%)",
@@ -120,20 +134,39 @@ function Chart() {
           </Grid.Column>
         </Grid.Row>
 
-        <Grid.Row>
-          {data && !error && !loading && (
-            <div className='chart-container'>
-              {transitions.map(({ item, props, key }) => {
-                return (
-                  <animated.div key={key} style={{ ...props, position: "absolute", width: "100%" }}>
-                    <ChartDataProvider data={data}>{item}</ChartDataProvider>
-                  </animated.div>
-                );
-              })}
-            </div>
-          )}
-          <Loader active={loading} inverted />
-        </Grid.Row>
+        {data && !error && !loading && (
+          <React.Fragment>
+            <Grid.Row>
+              <Grid.Column>
+                {transitionsHeader.map(({ item, props, key }) => {
+                  return (
+                    <animated.div
+                      key={key}
+                      style={{ ...props, position: "absolute", width: "100%" }}
+                    >
+                      <Header as='h3' inverted content={item} />
+                    </animated.div>
+                  );
+                })}
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <div className='chart-container'>
+                {transitionsBody.map(({ item, props, key }) => {
+                  return (
+                    <animated.div
+                      key={key}
+                      style={{ ...props, position: "absolute", width: "100%" }}
+                    >
+                      <ChartDataProvider data={data}>{item}</ChartDataProvider>
+                    </animated.div>
+                  );
+                })}
+              </div>
+              <Loader active={loading} inverted />
+            </Grid.Row>
+          </React.Fragment>
+        )}
       </Grid>
     </React.Fragment>
   );
