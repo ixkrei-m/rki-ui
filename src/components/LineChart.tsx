@@ -40,6 +40,7 @@ function LineChart() {
           dataKey='dailyCases'
           stroke='#ff7300'
           strokeWidth={2}
+          dot={false}
         />
       )}
       {recovered && (
@@ -50,6 +51,7 @@ function LineChart() {
           dataKey='dailyRecovered'
           stroke='#076fc4'
           strokeWidth={2}
+          dot={false}
         />
       )}
       {deaths && (
@@ -60,6 +62,7 @@ function LineChart() {
           dataKey='dailyDeaths'
           stroke='#8a34da'
           strokeWidth={2}
+          dot={false}
         />
       )}
     </RechartsLine>
