@@ -13,12 +13,17 @@ import {
 import { formatValue } from "helper";
 import { useChartControlContext } from "components/ChartControl";
 
-function BarChart() {
+interface Props {
+  name: string;
+}
+
+function BarChart(props: Props) {
+  const { name } = props;
   const { width, data, handleOnChangeBrush, cartesian } = useChartControlContext();
 
-  const startIndex = cartesian[BarChart.name].startIndex;
-  const endIndex = cartesian[BarChart.name].endIndex;
-  const { cases, recovered, deaths } = cartesian[BarChart.name];
+  const startIndex = cartesian[name].startIndex;
+  const endIndex = cartesian[name].endIndex;
+  const { cases, recovered, deaths } = cartesian[name];
 
   return (
     <RechartsBar data={data!} width={(width && width) || 0} height={500}>
@@ -34,9 +39,7 @@ function BarChart() {
         dataKey='date'
         startIndex={startIndex}
         endIndex={endIndex}
-        onChange={({ startIndex, endIndex }) =>
-          handleOnChangeBrush(BarChart.name, startIndex, endIndex)
-        }
+        onChange={({ startIndex, endIndex }) => handleOnChangeBrush(name, startIndex, endIndex)}
       >
         <AreaChart>
           <CartesianGrid />

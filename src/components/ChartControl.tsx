@@ -16,18 +16,19 @@ import BarChart from "components/BarChart";
 
 export interface ChartComponents {
   name: string;
-  comp: () => JSX.Element;
+  comp: (props: ChartComponentProps) => JSX.Element;
   props: {
     [key: string]: any;
+    header: string;
   };
 }
 
 interface HeaderProps {
-  children: (direction: string, index: number, headers: string[]) => JSX.Element;
+  children: (direction: string, index: number, chartComponents: ChartComponents[]) => JSX.Element;
 }
 
 export interface ChartComponentProps {
-  data: General[];
+  name: string;
 }
 
 interface ChartProps {
@@ -64,7 +65,6 @@ interface CartesianState {
 
 interface ChartControlState {
   chartComponents: ChartComponents[];
-  headers: string[];
   index: number;
   direction: string;
   width?: number | null;
@@ -78,9 +78,6 @@ interface ChartControlState {
     deaths?: boolean
   ) => void;
   cartesian: CartesianState;
-  cases: boolean;
-  recovered: boolean;
-  deaths: boolean;
   data: General[];
   loading: boolean;
   error?: FetchError;
@@ -100,20 +97,17 @@ export const useChartControlContext = () => {
 class ChartControl extends React.Component<{}, ChartControlState> {
   static Consumer = ChartControlContext.Consumer;
   public chartComponents: ChartComponents[];
-  public headers: string[];
 
   constructor(props: {}) {
     super(props);
 
     this.chartComponents = [
-      { name: "LineChart", comp: LineChart, props: { headers: "Fallzahlen pro Tag" } },
-      { name: "BarChart", comp: BarChart, props: { headers: "Fallzahlen Total" } },
+      { name: "LineChart", comp: LineChart, props: { header: "Fallzahlen pro Tag" } },
+      { name: "BarChart", comp: BarChart, props: { header: "Fallzahlen Total" } },
     ];
-    this.headers = ["Fallzahlen pro Tag", "Fallzahlen Total"];
 
     this.state = {
       chartComponents: this.chartComponents,
-      headers: this.headers,
       index: 0,
       direction: "",
       width: 0,
@@ -121,9 +115,6 @@ class ChartControl extends React.Component<{}, ChartControlState> {
       handleVisibility: this.handleVisibility,
       handleOnChangeBrush: this.handleOnChangeBrush,
       handleOnChangeToggle: this.handleOnChangeToggle,
-      cases: true,
-      recovered: true,
-      deaths: true,
       cartesian: this.createCartesianState(),
       data: undefined!,
       loading: false,
@@ -172,9 +163,9 @@ class ChartControl extends React.Component<{}, ChartControlState> {
   private getDefaultIndex(data: General[]) {
     const object: CartesianState = {};
 
-    this.chartComponents.forEach((comp) => {
-      object[comp.name] = {
-        ...this.state.cartesian[comp.name],
+    this.chartComponents.forEach(({ name }) => {
+      object[name] = {
+        ...this.state.cartesian[name],
         startIndex: data.length - 30,
       };
     });
@@ -186,8 +177,8 @@ class ChartControl extends React.Component<{}, ChartControlState> {
     let object: CartesianState = {};
     const state = { cases: true, recovered: true, deaths: true, startIndex: 0, endIndex: 0 };
 
-    this.chartComponents.forEach((comp) => {
-      object[comp.name] = state;
+    this.chartComponents.forEach(({ name }) => {
+      object[name] = state;
     });
 
     return object;
@@ -259,10 +250,15 @@ class ChartControl extends React.Component<{}, ChartControlState> {
 
     return (
       <ChartControl.Consumer>
-        {({ index, direction, headers }) => {
+        {({ index, direction, chartComponents, loading, error }) => {
           return (
             <Grid.Row>
-              <Grid.Column>{children(direction, index, headers)}</Grid.Column>
+              <Grid.Column>
+                {!loading && !error && children(direction, index, chartComponents)}
+                {!loading && error && (
+                  <Header inverted as='h3' content='Fehler beim Laden der Daten' />
+                )}
+              </Grid.Column>
             </Grid.Row>
           );
         }}
@@ -284,7 +280,7 @@ class ChartControl extends React.Component<{}, ChartControlState> {
                     handleVisibility(data.calculations.width);
                   }}
                 >
-                  <div>{children(direction, index, chartComponents)}</div>
+                  {!loading && !error && <div>{children(direction, index, chartComponents)}</div>}
                   {!loading && error && <RenderFetchErrorMessage error={error} />}
                 </Visibility>
                 <Loader active={loading} inverted content='Lade Daten...' size='large' />
@@ -299,45 +295,48 @@ class ChartControl extends React.Component<{}, ChartControlState> {
   static Toggles() {
     return (
       <ChartControl.Consumer>
-        {({ handleOnChangeToggle, cartesian, chartComponents, index }) => {
+        {({ handleOnChangeToggle, cartesian, chartComponents, index, loading, error }) => {
           const { cases, recovered, deaths } = cartesian[chartComponents[index].name];
           const { name } = chartComponents[index];
 
           return (
-            <Grid.Row>
-              <Grid.Column textAlign='center'>
-                <Checkbox
-                  name='cases'
-                  onClick={(event: any, data: CheckboxProps) =>
-                    handleOnChangeToggle(name, !cases, recovered, deaths)
-                  }
-                  checked={cases}
-                  label='Infektionen'
-                  className='padding white-label'
-                  slider
-                />
-                <Checkbox
-                  name='recovered'
-                  onClick={(event: any, data: CheckboxProps) =>
-                    handleOnChangeToggle(name, cases, !recovered, deaths)
-                  }
-                  checked={recovered}
-                  label='Genesen'
-                  className='padding white-label'
-                  slider
-                />
-                <Checkbox
-                  name='deaths'
-                  onClick={(event: any, data: CheckboxProps) =>
-                    handleOnChangeToggle(name, cases, recovered, !deaths)
-                  }
-                  checked={deaths}
-                  label='Todesfälle'
-                  className='padding white-label'
-                  slider
-                />
-              </Grid.Column>
-            </Grid.Row>
+            !loading &&
+            !error && (
+              <Grid.Row>
+                <Grid.Column textAlign='center'>
+                  <Checkbox
+                    name='cases'
+                    onClick={(event: any, data: CheckboxProps) =>
+                      handleOnChangeToggle(name, !cases, recovered, deaths)
+                    }
+                    checked={cases}
+                    label='Infektionen'
+                    className='padding white-label'
+                    slider
+                  />
+                  <Checkbox
+                    name='recovered'
+                    onClick={(event: any, data: CheckboxProps) =>
+                      handleOnChangeToggle(name, cases, !recovered, deaths)
+                    }
+                    checked={recovered}
+                    label='Genesen'
+                    className='padding white-label'
+                    slider
+                  />
+                  <Checkbox
+                    name='deaths'
+                    onClick={(event: any, data: CheckboxProps) =>
+                      handleOnChangeToggle(name, cases, recovered, !deaths)
+                    }
+                    checked={deaths}
+                    label='Todesfälle'
+                    className='padding white-label'
+                    slider
+                  />
+                </Grid.Column>
+              </Grid.Row>
+            )
           );
         }}
       </ChartControl.Consumer>
@@ -362,7 +361,6 @@ function RenderFetchErrorMessage(props: RenderFetchErrorMessageProps) {
 
   return (
     <React.Fragment>
-      <Header inverted as='h3' content='Fehler beim Laden der Daten' />
       <pre>{JSON.stringify(error, null, 2)}</pre>
     </React.Fragment>
   );

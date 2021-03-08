@@ -4,17 +4,10 @@ import { useTransition, animated } from "react-spring";
 
 import ChartControl, { ChartComponents } from "components/ChartControl";
 
-interface RenderProps {
+interface RenderTransitionProps {
+  chartComponents: ChartComponents[];
   direction: string;
   index: number;
-}
-
-interface RenderTransitionHeaderProps extends RenderProps {
-  headers: string[];
-}
-
-interface RenderTransitionChartProps extends RenderProps {
-  chartComponents: ChartComponents[];
 }
 
 function Chart() {
@@ -22,8 +15,12 @@ function Chart() {
     <ChartControl>
       <ChartControl.Switch />
       <ChartControl.Header>
-        {(direction, index, headers) => (
-          <RenderTransitionHeader direction={direction} index={index} headers={headers} />
+        {(direction, index, chartComponents) => (
+          <RenderTransitionHeader
+            direction={direction}
+            index={index}
+            chartComponents={chartComponents}
+          />
         )}
       </ChartControl.Header>
       <ChartControl.Chart>
@@ -42,10 +39,10 @@ function Chart() {
   );
 }
 
-function RenderTransitionHeader(props: RenderTransitionHeaderProps) {
-  const { direction, index, headers } = props;
+function RenderTransitionHeader(props: RenderTransitionProps) {
+  const { direction, index, chartComponents } = props;
 
-  const headerTransitions = useTransition(headers[index], index, {
+  const headerTransitions = useTransition(chartComponents[index], index, {
     from: {
       opacity: 0,
       transform: direction === "left" ? "translateX(-100%)" : "translateX(100%)",
@@ -62,7 +59,7 @@ function RenderTransitionHeader(props: RenderTransitionHeaderProps) {
       {headerTransitions.map(({ item, props, key }) => {
         return (
           <animated.div key={key} style={{ ...props, position: "absolute", width: "100%" }}>
-            <Header as='h3' inverted content={item} />
+            <Header as='h3' inverted content={item.props.header} />
           </animated.div>
         );
       })}
@@ -70,7 +67,7 @@ function RenderTransitionHeader(props: RenderTransitionHeaderProps) {
   );
 }
 
-function RenderTransitionChart(props: RenderTransitionChartProps) {
+function RenderTransitionChart(props: RenderTransitionProps) {
   const { direction, index, chartComponents } = props;
 
   const component = chartComponents[index];
@@ -93,7 +90,7 @@ function RenderTransitionChart(props: RenderTransitionChartProps) {
       {chartTransitions.map(({ item, props, key }) => {
         return (
           <animated.div key={key} style={{ ...props, position: "absolute", width: "100%" }}>
-            {item.comp()}
+            {item.comp({ name: item.name })}
           </animated.div>
         );
       })}

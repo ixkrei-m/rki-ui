@@ -13,12 +13,18 @@ import {
 import { formatValue } from "helper";
 import { useChartControlContext } from "components/ChartControl";
 
-function LineChart() {
+interface Props {
+  name: string;
+}
+
+function LineChart(props: Props) {
+  const { name } = props;
+
   const { width, data, handleOnChangeBrush, cartesian } = useChartControlContext();
 
-  const startIndex = cartesian[LineChart.name].startIndex;
-  const endIndex = cartesian[LineChart.name].endIndex;
-  const { cases, recovered, deaths } = cartesian[LineChart.name];
+  const startIndex = cartesian[name].startIndex;
+  const endIndex = cartesian[name].endIndex;
+  const { cases, recovered, deaths } = cartesian[name];
 
   return (
     <RechartsLine data={data!} width={(width && width) || 0} height={500}>
@@ -34,9 +40,7 @@ function LineChart() {
         dataKey='date'
         startIndex={startIndex}
         endIndex={endIndex}
-        onChange={({ startIndex, endIndex }) =>
-          handleOnChangeBrush(LineChart.name, startIndex, endIndex)
-        }
+        onChange={({ startIndex, endIndex }) => handleOnChangeBrush(name, startIndex, endIndex)}
       >
         <AreaChart>
           <CartesianGrid />
