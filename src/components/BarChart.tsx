@@ -1,4 +1,3 @@
-import { useChartDataProvider } from "components/ChartDataProvider";
 import {
   BarChart as RechartsBar,
   Bar,
@@ -11,13 +10,18 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { formatValue } from "components/Chart";
+import { formatValue } from "helper";
+import { useChartControlContext } from "components/ChartControl";
 
 function BarChart() {
-  const { data, width, cases, recovered, deaths } = useChartDataProvider();
+  const { width, data, handleOnChangeBrush, cartesian } = useChartControlContext();
+
+  const startIndex = cartesian[BarChart.name].startIndex;
+  const endIndex = cartesian[BarChart.name].endIndex;
+  const { cases, recovered, deaths } = cartesian[BarChart.name];
 
   return (
-    <RechartsBar data={data} width={width} height={500}>
+    <RechartsBar data={data!} width={(width && width) || 0} height={500}>
       <XAxis type='category' dataKey='date' height={60} />
       <YAxis type='number' width={80} />
       <Tooltip
@@ -26,7 +30,14 @@ function BarChart() {
       />
       <Legend verticalAlign='top' />
       <CartesianGrid />
-      <Brush dataKey='date'>
+      <Brush
+        dataKey='date'
+        startIndex={startIndex}
+        endIndex={endIndex}
+        onChange={({ startIndex, endIndex }) =>
+          handleOnChangeBrush(BarChart.name, startIndex, endIndex)
+        }
+      >
         <AreaChart>
           <CartesianGrid />
           <Area dataKey='date' stroke='#ff7300' fill='#333' dot={false} />

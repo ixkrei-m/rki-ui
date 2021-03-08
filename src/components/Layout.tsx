@@ -10,7 +10,7 @@ function Layout() {
       <div className='pre-main-content'>
         <div className='main-content'>
           <Container as='main'>
-            <Header inverted as='h1' content='Corona Charts für Deutschland' />
+            <Header inverted as='h1' content='Corona Charts für Deutschland 🇩🇪' />
             <Divider section hidden />
 
             <Grid columns='1' centered>

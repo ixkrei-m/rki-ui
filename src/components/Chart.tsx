@@ -1,80 +1,51 @@
-import React, { useEffect, useState } from "react";
-import { Grid, Header, Loader, Icon } from "semantic-ui-react";
-import moment, { Moment } from "moment";
+import React from "react";
+import { Header } from "semantic-ui-react";
 import { useTransition, animated } from "react-spring";
-import { TooltipPayload } from "recharts";
 
-import ChartDataProvider from "components/ChartDataProvider";
-import LineChart from "components/LineChart";
-import BarChart from "components/BarChart";
+import ChartControl, { ChartComponents } from "components/ChartControl";
 
-export interface IGeneral {
-  lastUpdate: string;
-  id: number;
-  recovered: number;
-  cases: number;
-  dailyCases: number;
-  dailyRecovered: number;
-  dailyDeaths: number;
-  createdAt: string;
-  updatedAt: string;
-  date: Moment;
+interface RenderProps {
+  direction: string;
+  index: number;
 }
 
-interface IFetchError {
-  code: number;
-  text: string;
+interface RenderTransitionHeaderProps extends RenderProps {
+  headers: string[];
 }
 
-/**
- * helper function to format number with separators
- */
-export function formatValue(
-  value: string | number | React.ReactText[],
-  name: string,
-  entry: TooltipPayload,
-  index: number
-) {
-  return `${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+interface RenderTransitionChartProps extends RenderProps {
+  chartComponents: ChartComponents[];
 }
 
 function Chart() {
-  const [data, setData] = useState<IGeneral[]>(undefined!);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<IFetchError>(undefined!);
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState("");
+  return (
+    <ChartControl>
+      <ChartControl.Switch />
+      <ChartControl.Header>
+        {(direction, index, headers) => (
+          <RenderTransitionHeader direction={direction} index={index} headers={headers} />
+        )}
+      </ChartControl.Header>
+      <ChartControl.Chart>
+        {(direction, index, chartComponents) => {
+          return (
+            <RenderTransitionChart
+              direction={direction}
+              index={index}
+              chartComponents={chartComponents}
+            />
+          );
+        }}
+      </ChartControl.Chart>
+      <ChartControl.Toggles />
+    </ChartControl>
+  );
+}
 
-  const headers = ["Fallzahlen pro Tag", "Fallzahlen Total"];
-  const chartComponents = [<LineChart />, <BarChart />];
+function RenderTransitionHeader(props: RenderTransitionHeaderProps) {
+  const { direction, index, headers } = props;
 
-  useEffect(() => {
-    setLoading(true);
-
-    fetch("https://corona.maximilianhaindl.de/api/general")
-      .then((res) => {
-        if (res.ok) {
-          res.json().then((rawData) => {
-            setLoading(false);
-            const data = rawData.rep.generals.map((item: IGeneral) => ({
-              ...item,
-              date: moment(item.date).format("dd L"),
-            }));
-            setData(data);
-          });
-        } else {
-          setError({ code: res.status, text: res.statusText });
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        setError({ code: error.code, text: error.msg });
-        setLoading(false);
-      });
-  }, []);
-
-  const transitionsHeader = useTransition(headers[index], index, {
-    config: { mass: 2, tension: 30, friction: 16 },
+  const headerTransitions = useTransition(headers[index], index, {
     from: {
       opacity: 0,
       transform: direction === "left" ? "translateX(-100%)" : "translateX(100%)",
@@ -86,7 +57,26 @@ function Chart() {
     },
   });
 
-  const transitionsBody = useTransition(chartComponents[index], index, {
+  return (
+    <React.Fragment>
+      {headerTransitions.map(({ item, props, key }) => {
+        return (
+          <animated.div key={key} style={{ ...props, position: "absolute", width: "100%" }}>
+            <Header as='h3' inverted content={item} />
+          </animated.div>
+        );
+      })}
+    </React.Fragment>
+  );
+}
+
+function RenderTransitionChart(props: RenderTransitionChartProps) {
+  const { direction, index, chartComponents } = props;
+
+  const component = chartComponents[index];
+
+  const chartTransitions = useTransition(component, index, {
+    config: { mass: 2, tension: 75, friction: 16 },
     from: {
       opacity: 0,
       transform: direction === "left" ? "translateX(-100%)" : "translateX(100%)",
@@ -99,76 +89,15 @@ function Chart() {
   });
 
   return (
-    <React.Fragment>
-      {!loading && error && (
-        <React.Fragment>
-          <Header inverted as='h3' content='Fehler beim Laden der Daten' />
-          <pre>{JSON.stringify(error, null, 2)}</pre>
-        </React.Fragment>
-      )}
-
-      <Grid columns='equal'>
-        <Grid.Row>
-          <Grid.Column
-            onClick={() => {
-              setDirection("left");
-              setIndex((old) => (old - 1 + chartComponents.length) % chartComponents.length);
-            }}
-            className='center-button row-background-left'
-            width='3'
-          >
-            <Icon size='big' color='grey' name='angle left' />
-          </Grid.Column>
-          <Grid.Column></Grid.Column>
-          <Grid.Column></Grid.Column>
-          <Grid.Column></Grid.Column>
-          <Grid.Column
-            onClick={() => {
-              setDirection("right");
-              setIndex((old) => (old + 1) % chartComponents.length);
-            }}
-            className='center-button row-background-right'
-            width='3'
-          >
-            <Icon size='big' color='grey' name='angle right' />
-          </Grid.Column>
-        </Grid.Row>
-
-        {data && !error && !loading && (
-          <React.Fragment>
-            <Grid.Row>
-              <Grid.Column>
-                {transitionsHeader.map(({ item, props, key }) => {
-                  return (
-                    <animated.div
-                      key={key}
-                      style={{ ...props, position: "absolute", width: "100%" }}
-                    >
-                      <Header as='h3' inverted content={item} />
-                    </animated.div>
-                  );
-                })}
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <div className='chart-container'>
-                {transitionsBody.map(({ item, props, key }) => {
-                  return (
-                    <animated.div
-                      key={key}
-                      style={{ ...props, position: "absolute", width: "100%" }}
-                    >
-                      <ChartDataProvider data={data}>{item}</ChartDataProvider>
-                    </animated.div>
-                  );
-                })}
-              </div>
-              <Loader active={loading} inverted />
-            </Grid.Row>
-          </React.Fragment>
-        )}
-      </Grid>
-    </React.Fragment>
+    <div className='chart-container' id='chart-container'>
+      {chartTransitions.map(({ item, props, key }) => {
+        return (
+          <animated.div key={key} style={{ ...props, position: "absolute", width: "100%" }}>
+            {item.comp()}
+          </animated.div>
+        );
+      })}
+    </div>
   );
 }
 
